@@ -1,17 +1,33 @@
-SYSTEMC_ARCH = linux
+LIB_DIR = -L/usr/local/systemc-2.3.3/lib-linux64
+INC_DIR = -I/usr/local/systemc-2.3.3/include 
 
-OPT    = -O3
-DEBUG  = -g
-OTHER  = -Wall -Wno-deprecated
-CXXFLAGS =  $(OTHER) $(DEBUG)
+## Adding systemc library
+LIBS   = -lsystemc $(EXTRA_LIBS)
 
-MODULE = fifo_tb 
-SRCS =  $(wildcard *.cpp)
+CXXFLAGS  = -Wall -Wno-deprecated -g
+
+TARGET_EXEC= fifo_tb
+SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 
-.PHONY:	clean
+.PHONY : all clean
 
-include ./Makefile.defs
+all:	$(TARGET_EXEC).exe
+
+$(TARGET_EXEC).exe:	$(OBJS) 
+	$(CXX) $(CXXFLAGS) $(INC_DIR) $(LIB_DIR) -o $@ $(OBJS) $(LIBS) 2>&1 | c++filt
+
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $(INC_DIR) -c $< -o $@
+
+.cc.o:
+	$(CXX) $(CXXFLAGS) $(INC_DIR) -c $< -o $@
 
 clean::
-	rm -f *.vcd Makefile.deps
+	rm -f $(OBJS) *~ $(TARGET_EXEC).exe *.vcd 
+	
+
+
+
+
