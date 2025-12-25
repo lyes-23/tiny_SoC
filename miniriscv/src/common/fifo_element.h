@@ -1,3 +1,16 @@
+//--------------------------------------------------------------------------------
+//
+// Copyright (c) 2017-2018 GNU ALL RIGHTS RESERVED
+//
+// Project: tinysoc
+// Description: Simple fifo used to cut timing by adding a stage of pipeline
+//
+// Release version: 
+// Additional Comments:
+//
+//--------------------------------------------------------------------------------
+
+
 #pragma once
 #include <systemc.h>
 
@@ -5,12 +18,13 @@
 
 template <int WIDTH, int DEPTH = 8>
 SC_MODULE(fifo) {
-
+	
+//Fifo should width and depth shouldn't be less or equal to zero
     static_assert(WIDTH > 0, "WIDTH must be > 0");
     static_assert(DEPTH > 0, "DEPTH must be > 0");
 
     sc_in_clk   clk;
-    sc_in<bool> arstn; // active-low ascync reset
+    sc_in<bool> arstn; // active-low async reset
 
     // fifo input
     sc_out<bool>            in_ready_o;    
@@ -36,8 +50,8 @@ SC_MODULE(fifo) {
     void trace(sc_trace_file *tf) const;
 
     SC_CTOR(fifo){
-        SC_CTHREAD(clock_set, fifo::clk.pos());
 
+        SC_CTHREAD(clock_set, fifo::clk.pos());
         sensitive << in_valid_i << out_ready_i;
 
         reset_signal_is(arstn, false);
