@@ -37,9 +37,9 @@ SC_MODULE(decode){
         sc_out<sc_uint<32>>	id2exe_op1_data;
        	sc_out<sc_uint<32>>	id2exe_op2_data;
 
-        sc_out<bool>		id2exe_regfile_write_en;
+        sc_out<bool>		id2exe_reg_wr_en;
         sc_out<sc_uint<2>>	id2exe_result_src;
-        sc_out<bool>		id2exe_memory_write_enable;
+        sc_out<bool>		id2exe_mem_wr_en;
         sc_out<bool>		id2exe_jump;
         sc_out<bool>		id2exe_branch;
         sc_out<bool>		id2exe_alu_src;
@@ -65,12 +65,27 @@ SC_MODULE(decode){
 	fifo<ID2EXE_SIZE,1>	id2exe;
 
 	// Decalaring signals
+	
+	sc_signal<sc_uint<5>>	reg_src1;
+	sc_signal<sc_uint<5>>	reg_src2;
+	sc_signal<sc_uint<5>>	reg_dest;
 
 	sc_signal<sc_uint<2>>	imm_src_d;
 	
 	sc_signal<sc_uint<7>>	op_type;
 	sc_signal<sc_uint<3>>	funct3;
 	sc_signal<sc_uint<1>>   funct7;	
+
+	sc_signal<sc_uint<32>> 	imm_ext;
+
+
+        sc_signal<bool>		reg_wr_en;
+        sc_signal<sc_uint<2>>	result_src;
+        sc_signal<bool>		mem_wr_en;
+        sc_signal<bool>		jump;
+        sc_signal<bool>		branch;
+        sc_signal<bool>		alu_src;
+        sc_signal<sc_uint<<3>>	alu_ctrl;
 
 
 	// pipeline signals
