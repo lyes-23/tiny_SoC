@@ -271,4 +271,55 @@ void decode::decoding_inst(){
 
 void decode::regfile_gestion(){
 
+	sc_uint<32> if_instr = if2id_instr.read();  
+
+	sc_uint<6>  raddr1_var;
+	sc_uint<6>  raddr2_var;
+	sc_uint<6>  addr_src_var;
+
+	if(r_type_inst == 1){
+	raddr1_var	= if_instr.range(19,15);
+	raddr2_var	= if_instr.range(24,20);
+	addr_src_var	= if_instr.range(11,7);
+	}
+	else if(i_type_inst == 1){
+	raddr1_var	= if_instr.range(19,15);
+	raddr2_var	= 0;
+	addr_src_var	= if_instr.range(11,7);
+	} 
+	else if(s_type_inst == 1){
+	raddr1_var	= if_instr.range(19,15);
+	raddr2_var	= if_instr.range(24,20);
+	addr_src_var	= 0;
+		
+	}
+	else if(b_type_inst == 1){
+	raddr1_var	= if_instr.range(19,15);
+	raddr2_var	= if_instr.range(24,20);
+	addr_src_var	= 0;
+	}
+	else if(u_type_inst ==1){
+	raddr1_var	= 0;
+	raddr2_var	= 0;
+	addr_src_var	= if_instr.range(11,7);
+	}
+	else if(j_type_inst ==1){
+	raddr1_var	= 0;
+	raddr2_var	= 0;
+	addr_src_var	= if_instr.range(11,7);
+	}
+	else if(jalr_type_inst==1){
+	raddr1_var	= if_instr.range(19,15);
+	raddr2_var	= 0;
+	addr_src_var	= if_instr.range(11,7);
+	}
+	else {
+	raddr1_var	= 0;
+	raddr2_var	= 0;
+	addr_src_var	= 0;
+	}
+
+	raddr1.write(raddr1_var);
+	raddr2.write(raddr2_var);
+	reg_dest.write(addr_src_var);
 }
