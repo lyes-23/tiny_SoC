@@ -6,9 +6,9 @@ void decode::concat_id2exe(){
 
 	sc_bv<ID2EXE_SIZE>	id2exe_concat;
 
-	id2exe_concat.range(184,183)		=	result_src.read();
-	id2exe_concat.range(182,180)		=	alu_ctrl.read();
-	
+	id2exe_concat.range(186,185)		=	result_src.read();
+	id2exe_concat.range(184,182)		=	alu_ctrl.read();
+	id2exe_concat.range(181,180)		=	mem_size.read();
 	id2exe_concat[179]			=	reg_wr_en.read();
 	id2exe_concat[178]			=	mem_wr_en.read();
 	id2exe_concat[177]			=	jump.read();
@@ -34,8 +34,10 @@ void decode::concat_id2exe(){
 void decode::unconcat_id2exe(){
 	sc_bv<ID2EXE_SIZE>	id2exe_unconcat	=	out_id2exe_data.read();
 
-	id2exe_alu_ctrl.write	( (sc_bv_base) id2exe_unconcat.range(184,183));
-	id2exe_result_src.write	( (sc_bv_base) id2exe_unconcat.range(182,180));
+	id2exe_alu_ctrl.write	( (sc_bv_base) id2exe_unconcat.range(186,185));
+	id2exe_result_src.write	( (sc_bv_base) id2exe_unconcat.range(184,182));
+
+	id2exe_mem_size.write	( (sc_bv_base) id2exe_unconcat[181,180]);
 
 	id2exe_reg_wr_en.write	( (bool) id2exe_unconcat[179]	);
 	id2exe_mem_wr_en.write	( (bool) id2exe_unconcat[178]	);
@@ -277,38 +279,38 @@ void decode::regfile_gestion(){
 	sc_uint<6>  raddr2_var;
 	sc_uint<6>  addr_src_var;
 
-	if(r_type_inst == 1){
+	if(r_type_inst ){
 	raddr1_var	= if_instr.range(19,15);
 	raddr2_var	= if_instr.range(24,20);
 	addr_src_var	= if_instr.range(11,7);
 	}
-	else if(i_type_inst == 1){
+	else if(i_type_inst ){
 	raddr1_var	= if_instr.range(19,15);
 	raddr2_var	= 0;
 	addr_src_var	= if_instr.range(11,7);
 	} 
-	else if(s_type_inst == 1){
+	else if(s_type_inst ){
 	raddr1_var	= if_instr.range(19,15);
 	raddr2_var	= if_instr.range(24,20);
 	addr_src_var	= 0;
 		
 	}
-	else if(b_type_inst == 1){
+	else if(b_type_inst ){
 	raddr1_var	= if_instr.range(19,15);
 	raddr2_var	= if_instr.range(24,20);
 	addr_src_var	= 0;
 	}
-	else if(u_type_inst ==1){
+	else if(u_type_inst ){
 	raddr1_var	= 0;
 	raddr2_var	= 0;
 	addr_src_var	= if_instr.range(11,7);
 	}
-	else if(j_type_inst ==1){
+	else if(j_type_inst ){
 	raddr1_var	= 0;
 	raddr2_var	= 0;
 	addr_src_var	= if_instr.range(11,7);
 	}
-	else if(jalr_type_inst==1){
+	else if(jalr_type_inst){
 	raddr1_var	= if_instr.range(19,15);
 	raddr2_var	= 0;
 	addr_src_var	= if_instr.range(11,7);
@@ -323,3 +325,86 @@ void decode::regfile_gestion(){
 	raddr2.write(raddr2_var);
 	reg_dest.write(addr_src_var);
 }
+
+void decode::control_unit(){
+
+
+	sc_uint<32> id2exe_op1_var;
+    	sc_uint<32> id2exe_op2_var;
+    	sc_uint<32> if_instr = INSTR_RI.read();
+    	sc_uint<32> mem_data_var;
+    	sc_uint<32> offset_branch_var;
+	bool	    branch_var   = false;
+    	bool        jump_var     = false;
+    	bool        illegal_inst = false;
+
+
+	if(r_type_inst || i_type_inst || u_type_inst ){
+		if(i_type_inst){
+			id2exe_op1_var = rdata1;
+			id2exe_op2_var.range(11,0) = if_instr.range(31,20);
+			if(if_instr[1] ){
+			id2exe_op2_var.range(31,12) = 0xFFFFF; 
+			} else{
+			id2exe_op2_var.range(31,12) = 0;
+			}
+		}
+		else if(u_type_inst){
+			id2exe_op1_var.range(31,12) = if_instr.range(31,12);
+			id2exe_op1_var.range(11,0 ) = 0;
+			if(auipc_inst){
+			id2exe_op2_var = if2id_pc_curr;
+			}
+			else {
+			id2exe_op2_var = rdata2;
+			}
+		}
+		else {
+			id2exe_op1_var = rdata1;
+			id2exe_op2_var = rdata2;
+		}
+
+		// controlling memory loading instructions
+		if(lw_inst | lh_inst | lhu_inst | lb_inst | lbu_inst) {
+			if(lw_inst)	
+				mem_size = 0;
+			else if(lh_inst | lhu_inst)	
+				mem_size = 1;
+			else if(lb_inst | lbu_inst)
+				mem_size = 2;
+			mem_wr_en = true;
+		}
+		else {
+		mem_wr_en = false;
+		mem_size  = 0;
+		}
+	}
+	else if (s_type_inst){
+	
+	}
+	else if (b_type_inst){
+	
+	}
+	else if( j_type_inst || jalr_type_inst ){
+	
+	}
+	else if( fence_type_inst) {
+
+	}
+	else{
+	
+	}
+}
+
+
+void decode::stall_gestion(){
+
+}
+
+
+void decode::trace(sc_trace_file *tf){
+
+}
+
+
+

@@ -40,6 +40,7 @@ SC_MODULE(decode){
         sc_out<bool>		id2exe_reg_wr_en;
         sc_out<sc_uint<2>>	id2exe_result_src;
         sc_out<bool>		id2exe_mem_wr_en;
+	sc_out<sc_uint<2>>	id2exe_mem_size;
         sc_out<bool>		id2exe_jump;
         sc_out<bool>		id2exe_branch;
         sc_out<bool>		id2exe_alu_src;
@@ -82,6 +83,7 @@ SC_MODULE(decode){
         sc_signal<bool>		reg_wr_en;
         sc_signal<sc_uint<2>>	result_src;
         sc_signal<bool>		mem_wr_en;
+	sc_signel<sc_uint<2>>	mem_size;
         sc_signal<bool>		jump;
         sc_signal<bool>		branch;
         sc_signal<bool>		alu_src;
@@ -107,6 +109,8 @@ SC_MODULE(decode){
    	 sc_signal<bool> u_type_inst;     // U type format
    	 sc_signal<bool> j_type_inst;     // J type format
    	 sc_signal<bool> jalr_type_inst;  
+
+	 sc_sivnal<bool> fence_type_inst; // NOP type format 
 
     // R-type Instructions :
 
@@ -175,6 +179,7 @@ SC_MODULE(decode){
 	 void decoding_inst_type();
 	 void decoding_inst();
 	 void regfile_gestion();
+	 void control_unit();
 	 void stall_gestion();
 	 void trace(sc_trace_file *tf);
 
