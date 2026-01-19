@@ -6,14 +6,15 @@ void decode::concat_id2exe(){
 
 	sc_bv<ID2EXE_SIZE>	id2exe_concat;
 
-	id2exe_concat.range(186,185)		=	result_src.read();
-	id2exe_concat.range(184,182)		=	alu_ctrl.read();
-	id2exe_concat.range(181,180)		=	mem_size.read();
-	id2exe_concat[179]			=	reg_wr_en.read();
-	id2exe_concat[178]			=	mem_wr_en.read();
-	id2exe_concat[177]			=	jump.read();
-	id2exe_concat[176]			=	branch.read();
-	id2exe_concat[175]			=	alu_src.read();
+	id2exe_concat.range(218,217)		=	result_src.read();
+	id2exe_concat.range(216,214)		=	alu_ctrl.read();
+	id2exe_concat.range(213,212)		=	mem_size.read();
+	id2exe_concat[211]		        	=	reg_wr_en.read();
+	id2exe_concat[210]		        	=	mem_wr_en.read();
+	id2exe_concat.range(178,209)		=	mem_data.read();
+	id2exe_concat[177]		        	=	jump.read();
+	id2exe_concat[176]		        	=	branch.read();
+	id2exe_concat[175]		        	=	alu_src.read();
 
 	id2exe_concat.range(174,143)		=	imm_ext_data.read();
 
@@ -24,7 +25,7 @@ void decode::concat_id2exe(){
 	id2exe_concat.range(127,96)		=	rdata1.read();
 	id2exe_concat.range(95,	64)		=	rdata2.read();
 
-	id2exe_concat.range(63, 32)		=	if2id_pc_curr.read();
+	id2exe_concat.range(63, 32)		=	branch_offset.read();
 	id2exe_concat.range(31,  0)		=	if2id_pc_next.read();
 
 	in_id2exe_data.write(id2exe_concat);
@@ -34,13 +35,15 @@ void decode::concat_id2exe(){
 void decode::unconcat_id2exe(){
 	sc_bv<ID2EXE_SIZE>	id2exe_unconcat	=	out_id2exe_data.read();
 
-	id2exe_alu_ctrl.write	( (sc_bv_base) id2exe_unconcat.range(186,185));
-	id2exe_result_src.write	( (sc_bv_base) id2exe_unconcat.range(184,182));
+	id2exe_alu_ctrl.write	( (sc_bv_base) id2exe_unconcat.range(218,217));
+	id2exe_result_src.write	( (sc_bv_base) id2exe_unconcat.range(216,214));
 
-	id2exe_mem_size.write	( (sc_bv_base) id2exe_unconcat[181,180]);
+	id2exe_mem_size.write	( (sc_bv_base) id2exe_unconcat[213,212]);
 
-	id2exe_reg_wr_en.write	( (bool) id2exe_unconcat[179]	);
-	id2exe_mem_wr_en.write	( (bool) id2exe_unconcat[178]	);
+	id2exe_reg_wr_en.write	( (bool) id2exe_unconcat[211]	);
+	id2exe_mem_wr_en.write	( (bool) id2exe_unconcat[210]	);
+  id2exe_mem_data.write   ( (sc_bv_base) id2exe_unconcat.range(178,209) );
+
 	id2exe_jump.write	( (bool) id2exe_unconcat[177]	);
 	id2exe_branch.write	( (bool) id2exe_unconcat[176]	);
 	id2exe_alu_src.write	( (bool) id2exe_unconcat[175]	);
@@ -55,15 +58,15 @@ void decode::unconcat_id2exe(){
 	id2exe_op1_data.write(	(sc_bv_base) id2exe_unconcat.range(127,96) );
 	id2exe_op2_data.write(	(sc_bv_base) id2exe_unconcat.range(95,64) );
 
-	id2exe_pc_curr.write(	(sc_bv_base) id2exe_unconcat.range(63,32) );
+  id2exe_branch_offset.write( (sc_bv_base) id2exe_unconcat.range(32,63));
 	id2exe_pc_next.write(	(sc_bv_base) id2exe_unconcat.range(31,0) );
 
 }
 
 void decode::decoding_inst_type(){
 
-	sc_uint<32> if_instr = if2id_instr.read(); 
-	op_type     = if_instr.range(6,0);
+	sc_uint<32> if_inst = if2id_inst.read(); 
+	op_type     = if_inst.range(6,0);
 
 	r_type_inst = op_type == 0b0110011  ? 1 : 0;
     	i_type_inst = (op_type == 0b0010011 || op_type == 0b0000011) ? 1 : 0;
@@ -76,10 +79,10 @@ void decode::decoding_inst_type(){
 
 void decode::decoding_inst(){
 
-	sc_uint<32> if_instr = if2id_instr.read();
+	sc_uint<32> if_inst = if2id_inst.read();
 
-	funct3	= if_instr.range(14,12);
-	funct7  = if_instr.range(31,25);
+	funct3	= if_inst.range(14,12);
+	funct7  = if_inst.range(31,25);
 	
 	// R type instructions
 
@@ -273,47 +276,47 @@ void decode::decoding_inst(){
 
 void decode::regfile_gestion(){
 
-	sc_uint<32> if_instr = if2id_instr.read();  
+	sc_uint<32> if_inst = if2id_inst.read();  
 
 	sc_uint<6>  raddr1_var;
 	sc_uint<6>  raddr2_var;
 	sc_uint<6>  addr_src_var;
 
 	if(r_type_inst ){
-	raddr1_var	= if_instr.range(19,15);
-	raddr2_var	= if_instr.range(24,20);
-	addr_src_var	= if_instr.range(11,7);
+	raddr1_var	= if_inst.range(19,15);
+	raddr2_var	= if_inst.range(24,20);
+	addr_src_var	= if_inst.range(11,7);
 	}
 	else if(i_type_inst ){
-	raddr1_var	= if_instr.range(19,15);
+	raddr1_var	= if_inst.range(19,15);
 	raddr2_var	= 0;
-	addr_src_var	= if_instr.range(11,7);
+	addr_src_var	= if_inst.range(11,7);
 	} 
 	else if(s_type_inst ){
-	raddr1_var	= if_instr.range(19,15);
-	raddr2_var	= if_instr.range(24,20);
+	raddr1_var	= if_inst.range(19,15);
+	raddr2_var	= if_inst.range(24,20);
 	addr_src_var	= 0;
 		
 	}
 	else if(b_type_inst ){
-	raddr1_var	= if_instr.range(19,15);
-	raddr2_var	= if_instr.range(24,20);
+	raddr1_var	= if_inst.range(19,15);
+	raddr2_var	= if_inst.range(24,20);
 	addr_src_var	= 0;
 	}
 	else if(u_type_inst ){
 	raddr1_var	= 0;
 	raddr2_var	= 0;
-	addr_src_var	= if_instr.range(11,7);
+	addr_src_var	= if_inst.range(11,7);
 	}
 	else if(j_type_inst ){
 	raddr1_var	= 0;
 	raddr2_var	= 0;
-	addr_src_var	= if_instr.range(11,7);
+	addr_src_var	= if_inst.range(11,7);
 	}
 	else if(jalr_type_inst){
-	raddr1_var	= if_instr.range(19,15);
+	raddr1_var	= if_inst.range(19,15);
 	raddr2_var	= 0;
-	addr_src_var	= if_instr.range(11,7);
+	addr_src_var	= if_inst.range(11,7);
 	}
 	else {
 	raddr1_var	= 0;
@@ -330,27 +333,28 @@ void decode::control_unit(){
 
 
 	sc_uint<32> id2exe_op1_var;
-    	sc_uint<32> id2exe_op2_var;
-    	sc_uint<32> if_instr = INSTR_RI.read();
-    	sc_uint<32> mem_data_var;
-    	sc_uint<32> offset_branch_var;
-	bool	    branch_var   = false;
-    	bool        jump_var     = false;
-    	bool        illegal_inst = false;
+  sc_uint<32> id2exe_op2_var;
+  sc_uint<32> if_inst = if2id_inst.read();
+  sc_uint<32> mem_data_var;
+  sc_uint<32> imm_ext_var;
+	
+  bool  	    branch_var   = false;
+  bool        jump_var     = false;
+  bool        illegal_inst = false;
 
 
 	if(r_type_inst || i_type_inst || u_type_inst ){
 		if(i_type_inst){
 			id2exe_op1_var = rdata1;
-			id2exe_op2_var.range(11,0) = if_instr.range(31,20);
-			if(if_instr[1] ){
+			id2exe_op2_var.range(11,0) = if_inst.range(31,20);
+			if(if_inst[1] ){
 			id2exe_op2_var.range(31,12) = 0xFFFFF; 
 			} else{
 			id2exe_op2_var.range(31,12) = 0;
 			}
 		}
 		else if(u_type_inst){
-			id2exe_op1_var.range(31,12) = if_instr.range(31,12);
+			id2exe_op1_var.range(31,12) = if_inst.range(31,12);
 			id2exe_op1_var.range(11,0 ) = 0;
 			if(auipc_inst){
 			id2exe_op2_var = if2id_pc_curr;
@@ -380,12 +384,78 @@ void decode::control_unit(){
 		}
 	}
 	else if (s_type_inst){
-	
+ 
+    branch_var   = false;
+    jump_var     = false;
+    illegal_inst = false;
+
+    // The data to be stored comes from rs2 
+		mem_data_var = rdata2.read();
+    mem_wr_en    = true;
+    
+    if(sw_inst){
+      mem_size = 0;
+    }
+    else if(sh_inst){
+      mem_size = 1; 
+    }
+    else if(sb_inst){
+      mem_size = 2; 
+    }
+
+    // the data of the rs1 that will be added to the imm
+    id2exe_op1_var = rdata1.read();
+
+    // Handling the Imm from the instruction and sign extension
+		id2exe_op2_var.range(11,5) = if_inst.range(31,25);
+		id2exe_op2_var.range(5,0 ) = if_inst.range(11,7 );
+		if(if_inst[31]){
+		  id2exe_op2_var.range(31,12) = 0xFFFFF;
+		}
+		else{
+      id2exe_op2_var.range(31,12) = 0;
+		}
 	}
 	else if (b_type_inst){
-	
-	}
-	else if( j_type_inst || jalr_type_inst ){
+	  branch_var   = true;
+	  jump_var     = false;
+	  illegal_inst = false;
+    mem_data_var = 0;
+    mem_wr_en    = false;
+    mem_size     = 0;
+    alu_ctrl     = ;
+
+    id2exe_op1_var = rdara1.read();
+    id2exe_op2_var = rdata2.read();
+
+    
+    if(if_inst[31]){
+        branch_offset_var.range(31,13) = 0xFFFFF; 
+    }
+    else{
+        branch_offset_var.range(31,13) = 0;
+    }
+
+    branch_offset_var[12] = if_inst[31]; 
+    branch_offset_var[11] = if_inst[7]
+    branch_offset_var.range(10,5) = if_inst.range(30,25);
+    branch_offset_var.range(4,1 ) = if_inst.range(11,8 );
+    branch_offset_var[0]  = 0;
+
+    if(beq_inst){}
+    else if(bne_inst){}
+    else if(blt_inst){}
+    else if(bge_inst){}
+    else if(bltu_inst){}
+    else if(bgeu_inst){}
+
+
+
+  
+  }
+  
+  
+  else if( j_type_inst || jalr_type_inst ){
 	
 	}
 	else if( fence_type_inst) {
