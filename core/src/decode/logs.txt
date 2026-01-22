@@ -1,0 +1,14 @@
+g++ -Wall -Wno-deprecated -g -I/usr/local/systemc-2.3.3/include -I../common/ -I../../include/ -c decode_tb.cpp -o decode_tb.o 
+In file included from /usr/local/systemc-2.3.3/include/sysc/kernel/sc_process.h:35,
+                 from /usr/local/systemc-2.3.3/include/sysc/kernel/sc_module.h:35,
+                 from /usr/local/systemc-2.3.3/include/systemc:74,
+                 from /usr/local/systemc-2.3.3/include/systemc.h:219,
+                 from decode_tb.cpp:2:
+/usr/local/systemc-2.3.3/include/sysc/kernel/sc_object.h:83:18: warning: ‘virtual void sc_core::sc_object::trace(sc_core::sc_trace_file*) const’ was hidden [-Woverloaded-virtual=]
+   83 |     virtual void trace( sc_trace_file* tf ) const;
+      |                  ^~~~~
+In file included from decode_tb.cpp:3:
+decode.h:190:11: note:   by ‘void decode::trace(sc_core::sc_trace_file*)’
+  190 |      void trace(sc_trace_file *tf);
+      |           ^~~~~
+g++ -Wall -Wno-deprecated -g -I/usr/local/systemc-2.3.3/include -I../common/ -I../../include/ -L/usr/local/systemc-2.3.3/lib-linux64 -o decode_tb.exe decode.o decode_tb.o -lsystemc  2>&1 | c++filt 
