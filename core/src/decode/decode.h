@@ -6,7 +6,7 @@
 
   SC_MODULE(decode){
 
-    sc_in_clk		clk;
+    sc_in_clk		  clk;
     sc_in<bool>		arstn;
 
   //===========================================
@@ -139,12 +139,12 @@
      sc_signal<bool> xori_inst;
      sc_signal<bool> jalr_inst;
      sc_signal<bool> fence_inst;
-
+     sc_signal<bool> sltiu_inst;
+     sc_signal<bool> slti_inst;
+     
       // I-type shift instructions :
 
     
-     sc_signal<bool> sltiu_inst;
-     sc_signal<bool> slti_inst;
      sc_signal<bool> slli_inst;
      sc_signal<bool> srli_inst;
      sc_signal<bool> srai_inst;

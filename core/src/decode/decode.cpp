@@ -419,16 +419,16 @@ void decode::control_unit(){
     } else if( sll_inst || slli_inst ){
         alu_ctrl_var = 6;
         signed_op_var = true;
-    } else if ( slt_inst || slti_inst){
+    } else if ( srl_inst || srli_inst){
         alu_ctrl_var = 7;
         signed_op_var = true;
-    } else if ( sltu_inst || sltiu_inst){
+    } else if ( sra_inst || srai_inst ){
         alu_ctrl_var = 8;
         signed_op_var = false;
-    } else if ( srl_inst || srli_inst){
+    } else if ( slt_inst || slti_inst){
         alu_ctrl_var = 9;
         signed_op_var = true;
-    } else if ( sra_inst || srai_inst){
+    } else if ( sltu_inst || sltiu_inst){
         alu_ctrl_var = 10;
         signed_op_var = true;
     } else
